@@ -1,6 +1,5 @@
 import { PKPass } from "passkit-generator";
 import { readFileSync } from "fs";
-import { writeFileSync } from "fs";
 import express from "express";
 const app = express();
 
@@ -16,6 +15,7 @@ export async function createPass(): Promise<Buffer> {
     const pass = await PKPass.from(
       {
         model: "./model/test.pass",
+
         certificates: {
           wwdr: readFileSync("./certs/wwdr.pem"),
           signerCert: readFileSync("./certs/signerCert.pem"),
@@ -24,6 +24,9 @@ export async function createPass(): Promise<Buffer> {
         },
       },
       {
+        backgroundColor: "rgb(22, 50, 96)",
+        foregroundColor: "rgb(255,255,255)",
+        labelColor: "rgb(255,255,255)",
         serialNumber: userId,
       }
     );
