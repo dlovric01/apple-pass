@@ -1,11 +1,9 @@
 import { PKPass } from "passkit-generator";
-import { readFileSync, writeFileSync } from "fs";
+import { readFileSync } from "fs";
 import express from "express";
-import bodyParser from "body-parser";
 const app = express();
-app.use(bodyParser.json({ limit: "1000mb" }));
 
-export async function createPass(imageBuffer: Buffer): Promise<Buffer> {
+export async function createPass(): Promise<Buffer> {
   const userId = "7312983712";
   const firstName = "Mirko";
   const lastName = "Marić";
@@ -22,7 +20,7 @@ export async function createPass(imageBuffer: Buffer): Promise<Buffer> {
           wwdr: readFileSync("./certs/wwdr.pem"),
           signerCert: readFileSync("./certs/signerCert.pem"),
           signerKey: readFileSync("./certs/signerKey.pem"),
-          signerKeyPassphrase: "test",
+          signerKeyPassphrase: "margins",
         },
       },
       {
@@ -48,14 +46,6 @@ export async function createPass(imageBuffer: Buffer): Promise<Buffer> {
         value: membershipNumber,
       }
     );
-    const imagePath = "./model/test.pass/thumbnail.png";
-    const imagePath2x = "./model/test.pass/thumbnail@2x.png";
-    writeFileSync(imagePath, imageBuffer);
-    writeFileSync(imagePath2x, imageBuffer);
-
-    // Add the image buffer to the pass
-    pass.addBuffer("thumbnail.png", imageBuffer);
-    pass.addBuffer("thumbnail@2x.png", imageBuffer);
 
     pass.auxiliaryFields.push(
       {
@@ -82,32 +72,18 @@ export async function createPass(imageBuffer: Buffer): Promise<Buffer> {
   }
 }
 
-app.post("/get-buffer", async (req, res) => {
-  try {
-    // Assuming 'imageBuffer' is a comma-separated string of integers
-    const imageBufferString = req.body.imageBuffer;
 
-    console.log(imageBufferString);
 
-    // Convert the string to an array of integers
-    const imageBufferArray = imageBufferString;
-
-    // Create a Buffer from the array of integers
-    const buffer = Buffer.from(imageBufferArray);
-
-    // Now you can use 'buffer' in your createPass function or any other logic
-    const pass = await createPass(buffer);
-
-    // Send the pass back to the Flutter application
-    res.send(pass);
-  } catch (error) {
-    console.error("Error processing image buffer:", error);
-    res.status(500).send("Internal Server Error");
-  }
+app.get("/get-buffer", async (req, res) => {
+  const pass = await createPass();
+  res.send(pass);
 });
 
-app.listen(3000, () => {
-  console.log("Server started on port 3000");
+var ip = "localhost";
+
+
+app.listen(3000, ip, () => {
+  console.log(`Server is running at http://${ip}:3000`);
 });
 
 // to run -> npm run start:dev
